@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
+using prosjekt_webapp2.Data.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,10 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
+builder.Services.AddScoped<IFolderRepository, FolderRepository>();
+builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
