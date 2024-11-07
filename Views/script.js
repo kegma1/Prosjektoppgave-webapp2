@@ -23,21 +23,23 @@ document.addEventListener("DOMContentLoaded", () => {
         event.preventDefault();
         const username = document.getElementById("login-username").value;
         const password = document.getElementById("login-password").value;
-
+    
         const response = await fetch('/api/auth/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password })
         });
-
+    
         const result = await response.json();
-
+        console.log(result);
+    
         if (response.ok) {
-            transformToWelcomeScreen(username);
+            transformToWelcomeScreen(username, result.token);
         } else {
             alert(result.message || "Login failed");
         }
     });
+    
 
     registerForm.addEventListener("submit", async (event) => {
         event.preventDefault();
@@ -54,30 +56,35 @@ document.addEventListener("DOMContentLoaded", () => {
         const result = await response.json();
 
         if (response.ok) {
-            transformToWelcomeScreen(username);
+            transformToWelcomeScreen(username, "Token will be shown upon login.");
         } else {
             alert(result.message || "Registration failed");
         }
     });
 
-    const transformToWelcomeScreen = (username) => {
+    const transformToWelcomeScreen = (username, token) => {
         document.body.innerHTML = `
             <div id="welcome-container">
                 <h1>Welcome, ${username}!</h1>
-                <p>You have successfully logged in.</p>
-                <button id="logout-button">Logout</button>
-                <button id="delete-button">Delete Account</button>
+                <p>Your unique JWT token:</p>
+                <div id="jwt-token">${token}</div>
+                <div id="button-container">
+                    <button id="logout-button">Logout</button>
+                    <button id="delete-button">Delete Account</button>
+                </div>
             </div>
         `;
-
+    
         document.getElementById("logout-button").addEventListener("click", () => {
             logOut();
         });
-
+    
         document.getElementById("delete-button").addEventListener("click", () => {
             deleteAccount(username);
         });
     };
+    
+    
 
     const logOut = () => {
         location.reload();

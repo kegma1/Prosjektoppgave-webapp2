@@ -1,4 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 using prosjekt_webapp2.Data.Repositories;
 
@@ -9,10 +14,12 @@ namespace Controller
     public class AuthController : ControllerBase
     {
         private readonly IAuthRepository _authRepository;
+        private readonly string _jwtSecret;
 
-        public AuthController(IAuthRepository authRepository)
+        public AuthController(IAuthRepository authRepository, IConfiguration configuration)
         {
             _authRepository = authRepository;
+            _jwtSecret = configuration["JwtSettings:Secret"];
         }
 
         [HttpPost("register")]
@@ -42,9 +49,11 @@ namespace Controller
                 return Unauthorized(new { message = "Invalid username or password." });
             }
 
-            var token = "mock-jwt-token";
+            var token = GenerateJwtToken(user.Username);
+            Console.WriteLine($"Generated Token: {token}");
             return Ok(new { token });
         }
+
 
         [HttpDelete("delete/{username}")]
         public async Task<IActionResult> DeleteAccount(string username)
@@ -58,5 +67,18 @@ namespace Controller
             return Ok(new { message = "Account deleted successfully." });
         }
 
+        private string GenerateJwtToken(string userId)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_jwtSecret);
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new[] { new Claim("userId", userId) }),
+                Expires = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
+        }
     }
 }

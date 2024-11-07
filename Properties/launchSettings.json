@@ -33,6 +33,7 @@
       "commandName": "IISExpress",
       "launchBrowser": true,
       "launchUrl": "",
+      "applicationUrl": "https://localhost:44324;http://localhost:41755",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
