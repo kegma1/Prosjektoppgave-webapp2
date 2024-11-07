@@ -19,37 +19,44 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    const mockApiRequest = (endpoint, data) => {
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                resolve({ success: true, message: `${endpoint} successful` });
-            }, 1000);
-        });
-    };
-
     loginForm.addEventListener("submit", async (event) => {
         event.preventDefault();
         const username = document.getElementById("login-username").value;
         const password = document.getElementById("login-password").value;
 
-        const response = await mockApiRequest("login", { username, password });
-        if (response.success) {
+        const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
             transformToWelcomeScreen(username);
         } else {
-            alert("Login failed");
+            alert(result.message || "Login failed");
         }
     });
 
     registerForm.addEventListener("submit", async (event) => {
         event.preventDefault();
         const username = document.getElementById("register-username").value;
+        const email = document.getElementById("register-email").value;
         const password = document.getElementById("register-password").value;
 
-        const response = await mockApiRequest("register", { username, password });
-        if (response.success) {
+        const response = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, email, password })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
             transformToWelcomeScreen(username);
         } else {
-            alert("Registration failed");
+            alert(result.message || "Registration failed");
         }
     });
 
@@ -58,7 +65,39 @@ document.addEventListener("DOMContentLoaded", () => {
             <div id="welcome-container">
                 <h1>Welcome, ${username}!</h1>
                 <p>You have successfully logged in.</p>
+                <button id="logout-button">Logout</button>
+                <button id="delete-button">Delete Account</button>
             </div>
         `;
+
+        document.getElementById("logout-button").addEventListener("click", () => {
+            logOut();
+        });
+
+        document.getElementById("delete-button").addEventListener("click", () => {
+            deleteAccount(username);
+        });
+    };
+
+    const logOut = () => {
+        location.reload();
+    };
+
+    const deleteAccount = async (username) => {
+        if (confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
+            const response = await fetch(`/api/auth/delete/${username}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                alert(result.message || "Account deleted successfully.");
+                logOut();
+            } else {
+                alert(result.message || "Failed to delete account.");
+            }
+        }
     };
 });
