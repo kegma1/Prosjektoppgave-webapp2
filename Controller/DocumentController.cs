@@ -1,17 +1,26 @@
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
+using prosjekt_webapp2.Data.Repositories;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Controller
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class DocumentController : ControllerBase
     {
+        private readonly IDocumentRepository _documentRepository;
+
+        public DocumentController(IDocumentRepository documentRepository, IConfiguration configuration)
+        {
+            _documentRepository = documentRepository;
+        }
+
         [HttpGet]
         public IActionResult GetDocuments()
         {
             var documents = new List<string> { "Document1", "Document2" };
-            return Ok(documents);
+            return Ok("documents");
         }
         [HttpGet("{id}")]
         public IActionResult GetDocument(int id)

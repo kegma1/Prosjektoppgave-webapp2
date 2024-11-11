@@ -15,11 +15,15 @@ namespace Controller
     {
         private readonly IAuthRepository _authRepository;
         private readonly string _jwtSecret;
+        private readonly string _jwtIssuer;
+        private readonly string _jwtAudience;
 
         public AuthController(IAuthRepository authRepository, IConfiguration configuration)
         {
             _authRepository = authRepository;
             _jwtSecret = configuration["JwtSettings:Secret"];
+            _jwtIssuer = configuration["JwtSettings:Issuer"]; // Retrieve Issuer from config
+            _jwtAudience = configuration["JwtSettings:Audience"]; // Retrieve Audience from config
         }
 
         [HttpPost("register")]
@@ -75,6 +79,8 @@ namespace Controller
             {
                 Subject = new ClaimsIdentity(new[] { new Claim("userId", userId) }),
                 Expires = DateTime.UtcNow.AddHours(1),
+                Issuer = _jwtIssuer, // Set issuer from the configuration
+                Audience = _jwtAudience, // Set audience from the configuration
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
