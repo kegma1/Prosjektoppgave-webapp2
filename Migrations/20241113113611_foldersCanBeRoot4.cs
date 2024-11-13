@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace prosjekt_webapp2.Migrations
 {
-    public partial class initialMig : Migration
+    public partial class foldersCanBeRoot4 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -38,16 +38,43 @@ namespace prosjekt_webapp2.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Folder",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", nullable: true),
+                    ParentFolderId = table.Column<int>(type: "INTEGER", nullable: true),
+                    UserId = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Folder", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Folder_Folder_ParentFolderId",
+                        column: x => x.ParentFolderId,
+                        principalTable: "Folder",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Folder_User_UserId",
+                        column: x => x.UserId,
+                        principalTable: "User",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Document",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Title = table.Column<string>(type: "TEXT", nullable: true),
+                    UserId = table.Column<int>(type: "INTEGER", nullable: false),
+                    ParentFolderId = table.Column<int>(type: "INTEGER", nullable: true),
                     Content = table.Column<string>(type: "TEXT", nullable: true),
                     ContentTypeId = table.Column<int>(type: "INTEGER", nullable: true),
-                    CreatedDate = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    UserId = table.Column<int>(type: "INTEGER", nullable: false)
+                    CreatedDate = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -58,6 +85,11 @@ namespace prosjekt_webapp2.Migrations
                         principalTable: "ContentType",
                         principalColumn: "Id");
                     table.ForeignKey(
+                        name: "FK_Document_Folder_ParentFolderId",
+                        column: x => x.ParentFolderId,
+                        principalTable: "Folder",
+                        principalColumn: "Id");
+                    table.ForeignKey(
                         name: "FK_Document_User_UserId",
                         column: x => x.UserId,
                         principalTable: "User",
@@ -65,37 +97,30 @@ namespace prosjekt_webapp2.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "Folder",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(type: "TEXT", nullable: true),
-                    ParentFolderId = table.Column<int>(type: "INTEGER", nullable: false),
-                    UserId = table.Column<int>(type: "INTEGER", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Folder", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Folder_Folder_ParentFolderId",
-                        column: x => x.ParentFolderId,
-                        principalTable: "Folder",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Folder_User_UserId",
-                        column: x => x.UserId,
-                        principalTable: "User",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+            migrationBuilder.InsertData(
+                table: "User",
+                columns: new[] { "Id", "Email", "Password", "Username" },
+                values: new object[] { 1, "a@a.a", "a", "a" });
+
+            migrationBuilder.InsertData(
+                table: "User",
+                columns: new[] { "Id", "Email", "Password", "Username" },
+                values: new object[] { 2, "b@b.b", "b", "b" });
+
+            migrationBuilder.InsertData(
+                table: "User",
+                columns: new[] { "Id", "Email", "Password", "Username" },
+                values: new object[] { 3, "c@c.c", "c", "c" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Document_ContentTypeId",
                 table: "Document",
                 column: "ContentTypeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Document_ParentFolderId",
+                table: "Document",
+                column: "ParentFolderId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Document_UserId",
@@ -119,10 +144,10 @@ namespace prosjekt_webapp2.Migrations
                 name: "Document");
 
             migrationBuilder.DropTable(
-                name: "Folder");
+                name: "ContentType");
 
             migrationBuilder.DropTable(
-                name: "ContentType");
+                name: "Folder");
 
             migrationBuilder.DropTable(
                 name: "User");

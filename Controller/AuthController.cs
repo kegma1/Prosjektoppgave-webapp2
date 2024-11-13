@@ -53,7 +53,7 @@ namespace Controller
                 return Unauthorized(new { message = "Invalid username or password." });
             }
 
-            var token = GenerateJwtToken(user.Username);
+            var token = GenerateJwtToken(user.Id.ToString());
             Console.WriteLine($"Generated Token: {token}");
             return Ok(new { token });
         }
@@ -79,8 +79,8 @@ namespace Controller
             {
                 Subject = new ClaimsIdentity(new[] { new Claim("userId", userId) }),
                 Expires = DateTime.UtcNow.AddHours(1),
-                Issuer = _jwtIssuer, // Set issuer from the configuration
-                Audience = _jwtAudience, // Set audience from the configuration
+                Issuer = _jwtIssuer,
+                Audience = _jwtAudience,
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);

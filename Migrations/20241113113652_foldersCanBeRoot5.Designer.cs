@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -9,9 +10,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace prosjekt_webapp2.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241113113652_foldersCanBeRoot5")]
+    partial class foldersCanBeRoot5
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.35");
@@ -28,18 +30,6 @@ namespace prosjekt_webapp2.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ContentType");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Type = 0
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Type = 1
-                        });
                 });
 
             modelBuilder.Entity("Document", b =>
@@ -51,7 +41,7 @@ namespace prosjekt_webapp2.Migrations
                     b.Property<string>("Content")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("ContentTypeId")
+                    b.Property<int?>("ContentTypeId")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("CreatedDate")
@@ -75,18 +65,6 @@ namespace prosjekt_webapp2.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Document");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Content = "Hallo,\nDette er en test",
-                            ContentTypeId = 1,
-                            CreatedDate = new DateTime(2024, 11, 13, 17, 44, 49, 765, DateTimeKind.Local).AddTicks(7631),
-                            ParentFolderId = 1,
-                            Title = "importante shit",
-                            UserId = 1
-                        });
                 });
 
             modelBuilder.Entity("Folder", b =>
@@ -129,48 +107,6 @@ namespace prosjekt_webapp2.Migrations
                         {
                             Id = 3,
                             Name = "c",
-                            UserId = 3
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Name = "Homework",
-                            ParentFolderId = 1,
-                            UserId = 1
-                        },
-                        new
-                        {
-                            Id = 8,
-                            Name = "Totally_legal_movies:)",
-                            ParentFolderId = 1,
-                            UserId = 1
-                        },
-                        new
-                        {
-                            Id = 9,
-                            Name = "great_tits",
-                            ParentFolderId = 4,
-                            UserId = 1
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Name = "Homework",
-                            ParentFolderId = 2,
-                            UserId = 2
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Name = "Homework",
-                            ParentFolderId = 3,
-                            UserId = 3
-                        },
-                        new
-                        {
-                            Id = 7,
-                            Name = "Photos",
-                            ParentFolderId = 3,
                             UserId = 3
                         });
                 });
@@ -222,9 +158,7 @@ namespace prosjekt_webapp2.Migrations
                 {
                     b.HasOne("ContentType", "ContentType")
                         .WithMany()
-                        .HasForeignKey("ContentTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ContentTypeId");
 
                     b.HasOne("Folder", "ParentFolder")
                         .WithMany()

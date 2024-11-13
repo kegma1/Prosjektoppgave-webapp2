@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace prosjekt_webapp2.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241105175527_initialMig")]
-    partial class initialMig
+    [Migration("20241113114243_moreTestfolders")]
+    partial class moreTestfolders
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -47,6 +47,9 @@ namespace prosjekt_webapp2.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("ParentFolderId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Title")
                         .HasColumnType("TEXT");
 
@@ -56,6 +59,8 @@ namespace prosjekt_webapp2.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ContentTypeId");
+
+                    b.HasIndex("ParentFolderId");
 
                     b.HasIndex("UserId");
 
@@ -71,7 +76,7 @@ namespace prosjekt_webapp2.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("ParentFolderId")
+                    b.Property<int?>("ParentFolderId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("UserId")
@@ -84,6 +89,68 @@ namespace prosjekt_webapp2.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Folder");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "a",
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "b",
+                            UserId = 2
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "c",
+                            UserId = 3
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Homework",
+                            ParentFolderId = 1,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Name = "Totally_legal_movies:)",
+                            ParentFolderId = 1,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Name = "great_tits",
+                            ParentFolderId = 4,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "Homework",
+                            ParentFolderId = 2,
+                            UserId = 2
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Name = "Homework",
+                            ParentFolderId = 3,
+                            UserId = 3
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Name = "Photos",
+                            ParentFolderId = 3,
+                            UserId = 3
+                        });
                 });
 
             modelBuilder.Entity("User", b =>
@@ -104,6 +171,29 @@ namespace prosjekt_webapp2.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("User");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Email = "a@a.a",
+                            Password = "a",
+                            Username = "a"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Email = "b@b.b",
+                            Password = "b",
+                            Username = "b"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Email = "c@c.c",
+                            Password = "c",
+                            Username = "c"
+                        });
                 });
 
             modelBuilder.Entity("Document", b =>
@@ -111,6 +201,10 @@ namespace prosjekt_webapp2.Migrations
                     b.HasOne("ContentType", "ContentType")
                         .WithMany()
                         .HasForeignKey("ContentTypeId");
+
+                    b.HasOne("Folder", "ParentFolder")
+                        .WithMany()
+                        .HasForeignKey("ParentFolderId");
 
                     b.HasOne("User", "Owner")
                         .WithMany()
@@ -121,15 +215,15 @@ namespace prosjekt_webapp2.Migrations
                     b.Navigation("ContentType");
 
                     b.Navigation("Owner");
+
+                    b.Navigation("ParentFolder");
                 });
 
             modelBuilder.Entity("Folder", b =>
                 {
                     b.HasOne("Folder", "ParentFolder")
                         .WithMany()
-                        .HasForeignKey("ParentFolderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ParentFolderId");
 
                     b.HasOne("User", "Owner")
                         .WithMany()
