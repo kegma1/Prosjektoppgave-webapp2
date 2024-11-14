@@ -14,29 +14,24 @@ namespace prosjekt_webapp2.Data.Repositories {
 		}
 
 		public IEnumerable<Folder> GetUserFolders(int userId, int? parentId = null) {
-			return _context.Folder.Where(b => b.UserId == userId).Where(b => b.ParentFolderId == parentId).Include(b => b.ParentFolder).Include(b => b.Owner).ToList();
+			return _context.Folder
+				.Where(b => b.UserId == userId)
+				.Where(b => b.ParentFolderId == parentId)
+				.Include(b => b.ParentFolder)
+				.Include(b => b.Owner)
+				.ToList();
 		}
 		public Folder GetSpecificFolder(int id) {
-			return _context.Folder.Include(b => b.ParentFolder).Include(b => b.Owner).FirstOrDefault(b => b.Id == id);
+			return _context.Folder
+				.Include(b => b.ParentFolder)
+				.Include(b => b.Owner)
+				.FirstOrDefault(b => b.Id == id);
 		}
 
-		public void AddFolder(string name, int parentId) {
-
-			if (parentId != null) {
-				var folder = new Folder {
-					Name = name,
-					ParentFolderId = parentId
-				};
-				_context.Folder.Add(folder);
-				_context.SaveChanges();
-			}
-			else {
-				var folder = new Folder { 
-					Name = name
-				};
-				_context.Folder.Add(folder);
-				_context.SaveChanges();
-			}
+		public Folder AddFolder(Folder folder) {
+			_context.Folder.Add(folder);
+			_context.SaveChanges();
+			return folder;
 		}
 
 		public void DeleteFolder(Folder folder) {
@@ -44,9 +39,10 @@ namespace prosjekt_webapp2.Data.Repositories {
 			_context.SaveChanges();
 		}
 
-		public void UpdateFolder(Folder folder) {
+		public Folder UpdateFolder(Folder folder) {
 			_context.Folder.Update(folder);
 			_context.SaveChanges();
+			return folder;
 		}
 	}
 }

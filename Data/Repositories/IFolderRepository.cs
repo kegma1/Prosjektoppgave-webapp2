@@ -5,8 +5,8 @@ namespace prosjekt_webapp2.Data.Repositories {
 		public IEnumerable<Folder> GetAllFolders();
 		public IEnumerable<Folder> GetUserFolders(int userId, int? parentId = null);
 		public Folder GetSpecificFolder(int id);
-		public void AddFolder(string name, int parentId);
+		public Folder AddFolder(Folder folder);
 		public void DeleteFolder(Folder folder);
-		public void UpdateFolder(Folder folder);
+		public Folder UpdateFolder(Folder folder);
 	}
 }
