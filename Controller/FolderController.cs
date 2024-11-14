@@ -11,9 +11,11 @@ namespace Controller
 	public class FolderController : ControllerBase
     {
 		private readonly IFolderRepository _folderRepository;
+		private readonly IDocumentRepository _documentRepository;
 
-		public FolderController(IFolderRepository folderRepository, IConfiguration configuration) {
+		public FolderController(IFolderRepository folderRepository, IDocumentRepository documentRepository, IConfiguration configuration) {
 			_folderRepository = folderRepository;
+			_documentRepository = documentRepository;
 		}
 
 		[HttpGet]
@@ -38,7 +40,31 @@ namespace Controller
 
             var folder = _folderRepository.GetSpecificFolder(id);
 
+			if (folder.UserId != userId) {
+				return Unauthorized("You do not have premission to view this folder");
+			}
+
 			return Ok(folder);
+        }
+
+		[HttpGet("content/{id}")]
+        public IActionResult GetFoldercontent(int id)
+        {
+            var userId = GetCurrentUserId();
+			if (userId == null) {
+				return Unauthorized("Could not find ID in token");
+			}
+
+            var folder = _folderRepository.GetSpecificFolder(id);
+
+			if (folder.UserId != userId) {
+				return Unauthorized("You do not have premission to view this folder");
+			}
+
+			var subFolders = _folderRepository.GetSubFolders(folder);
+			var files = _documentRepository.GetDocumentsByFolder(folder.Id);
+
+			return Ok(new { folders = subFolders, documents = files});
         }
 
         [HttpPost]

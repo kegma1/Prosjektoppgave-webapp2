@@ -44,5 +44,13 @@ namespace prosjekt_webapp2.Data.Repositories {
 			_context.SaveChanges();
 			return folder;
 		}
+		
+		public IEnumerable<Folder> GetSubFolders(Folder folder) {
+			return _context.Folder
+				.Where(b => b.ParentFolderId == folder.Id)
+				.Include(b => b.ParentFolder)
+				.Include(b => b.Owner)
+				.ToList();
+		}
 	}
 }
