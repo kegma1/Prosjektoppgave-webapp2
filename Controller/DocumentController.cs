@@ -76,7 +76,7 @@ namespace Controller
         }
 
         [HttpPost("upload-image")]
-        public async Task<IActionResult> UploadImage([FromForm] IFormFile file, [FromForm] int folderId)
+        public async Task<IActionResult> UploadImage(IFormFile file, int folderId)
         {
             var userId = GetCurrentUserId();
             if (userId == null)
@@ -110,6 +110,7 @@ namespace Controller
 
             var fileName = Guid.NewGuid().ToString() + fileExtension;
             var filePath = Path.Combine("uploads", fileName);
+            Console.WriteLine(filePath);
             var absoluteFilePath = Path.Combine(Directory.GetCurrentDirectory(), filePath);
 
             using (var stream = new FileStream(absoluteFilePath, FileMode.Create))
