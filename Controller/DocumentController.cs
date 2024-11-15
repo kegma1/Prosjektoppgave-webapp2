@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using prosjekt_webapp2.Data.Repositories;
 using Microsoft.AspNetCore.Authorization;
+using System.IO;
 
 namespace Controller
 {
@@ -29,6 +30,7 @@ namespace Controller
             var documents = _documentRepository.GetDocumentsByUser((int)userId);
             return Ok(documents);
         }
+
         [HttpGet("{id}")]
         public IActionResult GetDocument(int id)
         {
@@ -40,7 +42,7 @@ namespace Controller
             var document = _documentRepository.GetDocumentById(id);
 
             if (document.UserId != userId) {
-                return Unauthorized("You do not have premission to view this document");
+                return Unauthorized("You do not have permission to view this document");
             }
 
             return Ok(document);
@@ -57,7 +59,7 @@ namespace Controller
             var parentFolder = _folderRepository.GetSpecificFolder(model.FolderId);
 
             if (parentFolder.UserId != userId) {
-                return Unauthorized("You do not have premission to create a file in this folder");
+                return Unauthorized("You do not have permission to create a file in this folder");
             }
 
             var document = new Document {
@@ -73,63 +75,128 @@ namespace Controller
             return CreatedAtAction(nameof(GetDocument), new { id = newDocument.Id }, newDocument);
         }
 
-        [HttpPut("{id}")]
-        public IActionResult UpdateDocument(int id, [FromBody] DocumentModel model)
+        [HttpPost("upload-image")]
+        public async Task<IActionResult> UploadImage([FromForm] IFormFile file, [FromForm] int folderId)
         {
             var userId = GetCurrentUserId();
-            if (userId == null) {
+            if (userId == null)
+            {
+                return Unauthorized("Could not find ID in token");
+            }
+
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest("No file was uploaded.");
+            }
+
+            var parentFolder = _folderRepository.GetSpecificFolder(folderId);
+            if (parentFolder.UserId != userId)
+            {
+                return Unauthorized("You do not have permission to upload a file to this folder.");
+            }
+
+            var allowedFileTypes = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+            var fileExtension = Path.GetExtension(file.FileName).ToLowerInvariant();
+            if (!allowedFileTypes.Contains(fileExtension))
+            {
+                return BadRequest("Invalid file type. Only JPG, JPEG, PNG, and GIF are allowed.");
+            }
+
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
+            if (!Directory.Exists(uploadsFolder))
+            {
+                Directory.CreateDirectory(uploadsFolder);
+            }
+
+            var fileName = Guid.NewGuid().ToString() + fileExtension;
+            var filePath = Path.Combine("uploads", fileName);
+            var absoluteFilePath = Path.Combine(Directory.GetCurrentDirectory(), filePath);
+
+            using (var stream = new FileStream(absoluteFilePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            var document = new Document
+            {
+                Title = file.FileName,
+                Content = filePath,
+                ParentFolderId = folderId,
+                UserId = (int)userId,
+                ContentTypeId = 2,
+                CreatedDate = DateTime.Now
+            };
+
+            var newDocument = _documentRepository.AddDocument(document);
+
+            return CreatedAtAction(nameof(GetDocument), new { id = newDocument.Id }, newDocument);
+        }
+
+        [HttpGet("download/{id}")]
+        public IActionResult DownloadImage(int id)
+        {
+            var userId = GetCurrentUserId();
+            if (userId == null)
+            {
                 return Unauthorized("Could not find ID in token");
             }
 
             var document = _documentRepository.GetDocumentById(id);
 
-            if (document.UserId != userId) {
-                return Unauthorized("You do not have premission to update this document");
+            if (document.UserId != userId)
+            {
+                return Unauthorized("You do not have permission to access this document.");
             }
 
-            var parentFolder = _folderRepository.GetSpecificFolder(model.FolderId);
-
-            if (parentFolder.UserId != userId) {
-                return Unauthorized("You do not have premission to move this document to this folder");
+            if (document.ContentTypeId != 2)
+            {
+                return BadRequest("The requested document is not an image.");
             }
 
-            document.Title = model.Name;
-            document.Content = model.Content;
-            document.ParentFolderId = model.FolderId;
-            
-            var newDocument = _documentRepository.UpdateDocument(document);
-            
-            return CreatedAtAction(nameof(GetDocument), new { id = newDocument.Id }, newDocument);
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), document.Content);
+            if (!System.IO.File.Exists(filePath))
+            {
+                return NotFound("File not found.");
+            }
+
+            var fileBytes = System.IO.File.ReadAllBytes(filePath);
+            var fileName = Path.GetFileName(filePath);
+
+            return File(fileBytes, "application/octet-stream", fileName);
         }
 
         [HttpDelete("{id}")]
         public IActionResult DeleteDocument(int id)
         {
             var userId = GetCurrentUserId();
-            if (userId == null) {
+            if (userId == null)
+            {
                 return Unauthorized("Could not find ID in token");
             }
 
             var document = _documentRepository.GetDocumentById(id);
 
-            if (document.UserId != userId) {
-                return Unauthorized("You do not have premission to delete this document");
+            if (document.UserId != userId)
+            {
+                return Unauthorized("You do not have permission to delete this document");
             }
-            
+
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), document.Content);
+            if (!string.IsNullOrEmpty(document.Content) && System.IO.File.Exists(filePath))
+            {
+                System.IO.File.Delete(filePath);
+            }
+
             _documentRepository.DeleteDocument(document);
 
             return Ok(new { message = "Document deleted successfully" });
         }
-        
+
         [NonAction]
-        public int? GetCurrentUserId() {
+        public int? GetCurrentUserId()
+        {
             var userIdClaim = User.FindFirst("userId")?.Value;
-
-            if (string.IsNullOrEmpty(userIdClaim)) {
-                return null;
-            }
-
-            return int.Parse(userIdClaim);
+            return string.IsNullOrEmpty(userIdClaim) ? null : int.Parse(userIdClaim);
         }
     }
 
@@ -141,6 +208,7 @@ namespace Controller
         public int FolderId { get; set; }
     }
 }
+
 
 // {
 //   "id": 1,

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -9,9 +10,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace prosjekt_webapp2.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241115094053_SeedImageDocument")]
+    partial class SeedImageDocument
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.36");
@@ -82,7 +84,7 @@ namespace prosjekt_webapp2.Migrations
                             Id = 1,
                             Content = "Hallo,\nDette er en test",
                             ContentTypeId = 1,
-                            CreatedDate = new DateTime(2024, 11, 15, 10, 49, 7, 68, DateTimeKind.Local).AddTicks(3541),
+                            CreatedDate = new DateTime(2024, 11, 15, 10, 40, 52, 905, DateTimeKind.Local).AddTicks(821),
                             ParentFolderId = 1,
                             Title = "importante shit",
                             UserId = 1
@@ -90,9 +92,9 @@ namespace prosjekt_webapp2.Migrations
                         new
                         {
                             Id = 2,
-                            Content = "uploads\\Narvik-by-vinter-1440x900.jpg",
+                            Content = "C:\\Users\\bjune\\OneDrive\\Documents\\Programmering\\Prosjektoppgave Webapi\\Prosjektoppgave-webapp2\\uploads\\Narvik-by-vinter-1440x900.jpg",
                             ContentTypeId = 2,
-                            CreatedDate = new DateTime(2024, 11, 15, 10, 49, 7, 68, DateTimeKind.Local).AddTicks(3569),
+                            CreatedDate = new DateTime(2024, 11, 15, 10, 40, 52, 905, DateTimeKind.Local).AddTicks(854),
                             ParentFolderId = 7,
                             Title = "Narvik Winter Image",
                             UserId = 1

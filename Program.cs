@@ -3,6 +3,7 @@ using prosjekt_webapp2.Data.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -74,6 +75,12 @@ builder.Services.AddAuthentication(options =>
 
 var app = builder.Build();
 
+var uploadsDir = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
+if (!Directory.Exists(uploadsDir))
+{
+    Directory.CreateDirectory(uploadsDir);
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -83,6 +90,12 @@ if (app.Environment.IsDevelopment())
         c.RoutePrefix = string.Empty;
     });
 }
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(uploadsDir),
+    RequestPath = "/uploads"
+});
 
 app.UseRouting();
 app.UseCors("AllowAllOrigins");
