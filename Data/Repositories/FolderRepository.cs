@@ -13,10 +13,9 @@ namespace prosjekt_webapp2.Data.Repositories {
 			return _context.Folder.Include(b => b.ParentFolder).ToList();
 		}
 
-		public IEnumerable<Folder> GetUserFolders(int userId, int? parentId = null) {
+		public IEnumerable<Folder> GetUserFolders(int userId) {
 			return _context.Folder
 				.Where(b => b.UserId == userId)
-				.Where(b => b.ParentFolderId == parentId)
 				.Include(b => b.ParentFolder)
 				.Include(b => b.Owner)
 				.ToList();

@@ -26,7 +26,7 @@ namespace Controller
 				return Unauthorized("Could not find ID in token");
 			}
 
-			var folders = _folderRepository.GetAllFolders();
+			var folders = _folderRepository.GetUserFolders((int)userId);
             return Ok(folders);
         }
 
@@ -68,14 +68,14 @@ namespace Controller
         }
 
         [HttpPost]
-        public IActionResult CreateFolder([FromBody] FolderModel model, int parentId)
+        public IActionResult CreateFolder([FromBody] FolderModel model)
         {
 			var userId = GetCurrentUserId();
 			if (userId == null) {
 				return Unauthorized("Could not find ID in token");
 			}
 
-			var parentFolder = _folderRepository.GetSpecificFolder(parentId);
+			var parentFolder = _folderRepository.GetSpecificFolder(model.parentId);
 
 			if (parentFolder.UserId != userId) {
 				return Unauthorized("You do not have premission to create a folder in this folder");
@@ -83,7 +83,7 @@ namespace Controller
 
 			var folder = new Folder{
 				Name = model.Name,
-				ParentFolderId = parentId,
+				ParentFolderId = model.parentId,
 				UserId = (int)userId,
 			};
 
@@ -106,6 +106,7 @@ namespace Controller
 			}
 
 			folder.Name = model.Name;
+			folder.ParentFolderId = model.parentId;
 
 			var newFolder = _folderRepository.UpdateFolder(folder);
 
@@ -145,5 +146,6 @@ namespace Controller
 	public class FolderModel
     {
         public string Name { get; set; }
+		public int parentId { get; set; }
     }
 }

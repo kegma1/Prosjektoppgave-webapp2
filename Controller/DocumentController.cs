@@ -67,7 +67,8 @@ namespace Controller
                 Content = model.Content,
                 ParentFolderId = model.FolderId,
                 UserId = (int)userId,
-                ContentTypeId = 1
+                ContentTypeId = 1,
+                CreatedDate = DateTime.Now
             };
 
             var newDocument = _documentRepository.AddDocument(document);
@@ -209,11 +210,3 @@ namespace Controller
         public int FolderId { get; set; }
     }
 }
-
-
-// {
-//   "id": 1,
-//   "username": "a",
-//   "password": "a",
-//   "email": "a@a.a"
-// }
